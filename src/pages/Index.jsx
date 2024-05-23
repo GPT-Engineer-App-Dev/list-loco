@@ -5,6 +5,8 @@ import { FaTrash } from "react-icons/fa";
 const Index = () => {
   const [tasks, setTasks] = useState([]);
   const [task, setTask] = useState("");
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editedTask, setEditedTask] = useState("");
 
   const addTask = () => {
     if (task.trim() !== "") {
@@ -25,6 +27,20 @@ const Index = () => {
     setTasks(newTasks);
   };
 
+  const editTask = (index) => {
+    setEditingIndex(index);
+    setEditedTask(tasks[index].text);
+  };
+
+  const saveTask = (index) => {
+    const newTasks = tasks.map((t, i) => 
+      i === index ? { ...t, text: editedTask } : t
+    );
+    setTasks(newTasks);
+    setEditingIndex(null);
+    setEditedTask("");
+  };
+
   return (
     <Container centerContent maxW="container.md" py={10}>
       <VStack spacing={4} w="100%">
@@ -43,7 +59,23 @@ const Index = () => {
                 isChecked={t.completed} 
                 onChange={() => toggleTaskCompletion(index)}
               >
-                <Text as={t.completed ? "s" : ""}>{t.text}</Text>
+                {editingIndex === index ? (
+                  <Input 
+                    value={editedTask} 
+                    onChange={(e) => setEditedTask(e.target.value)} 
+                    onBlur={() => saveTask(index)}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        saveTask(index);
+                      }
+                    }}
+                    autoFocus
+                  />
+                ) : (
+                  <Text as={t.completed ? "s" : ""} onDoubleClick={() => editTask(index)}>
+                    {t.text}
+                  </Text>
+                )}
               </Checkbox>
               <IconButton 
                 aria-label="Delete task" 
